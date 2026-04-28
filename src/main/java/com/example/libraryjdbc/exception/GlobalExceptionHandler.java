@@ -5,26 +5,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(LibraryException.class)
-    public ResponseEntity<ErrorResponse> handleLibraryException(LibraryException ex) {
-        ErrorResponse error = new ErrorResponse(ex.getMessage(), ex.getStatus(), null);
-        return new ResponseEntity<>(error, HttpStatus.valueOf(ex.getStatus()));
+    public ResponseEntity<ErrorResponse> handleLibrary(LibraryException e) {
+        return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getMessage(), e.getStatus(), null));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex){
-        String message = ex.getBindingResult().getFieldError().getDefaultMessage();
-        ErrorResponse error = new ErrorResponse(message, HttpStatus.BAD_REQUEST.value(), null);
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
+        String msg = e.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+        return ResponseEntity.badRequest().body(new ErrorResponse(msg, 400, null));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-        ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), null);
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception e) {
+        return ResponseEntity.status(500).body(new ErrorResponse("Internal error", 500, null));
     }
 }

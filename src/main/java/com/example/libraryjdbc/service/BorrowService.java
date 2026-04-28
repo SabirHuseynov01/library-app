@@ -1,5 +1,6 @@
 package com.example.libraryjdbc.service;
 
+
 import com.example.libraryjdbc.dto.BookResponse;
 import com.example.libraryjdbc.dto.BorrowRequest;
 import com.example.libraryjdbc.dto.BorrowResponse;
@@ -13,73 +14,54 @@ import java.util.List;
 @Service
 public class BorrowService {
 
-    private final BorrowRepository borrowRepository;
+    private final BorrowRepository borrowRepo;
     private final BookService bookService;
     private final StudentService studentService;
 
-    public BorrowService(BorrowRepository borrowRepository, BookService bookService, StudentService studentService) {
-        this.borrowRepository = borrowRepository;
+    public BorrowService(BorrowRepository borrowRepo, BookService bookService, StudentService studentService) {
+        this.borrowRepo = borrowRepo;
         this.bookService = bookService;
         this.studentService = studentService;
     }
 
     @Transactional
-    public BorrowResponse borrowBook(BorrowRequest request) {
-        if (!bookService.bookExists(request.getBookId())){
-            throw new LibraryException("Kitap tapilmadi", 404);
-        }
+    public BorrowResponse borrowBook(BorrowRequest r) {
+        if (!bookService.bookExists(r.getBookId())) throw new LibraryException("Book not found", 404);
+        if (!studentService.studentExists(r.getStudentId())) throw new LibraryException("Student not found", 404);
 
-        if (!studentService.studentExists(request.getStudentId())){
-            throw new LibraryException("Student tapilmadi", 404);
-        }
+        BookResponse book = bookService.getBookById(r.getBookId());
+        if (book.getAvailableQuantity() <= 0) throw new LibraryException("Book not available", 400);
+        if (borrowRepo.hasAnyActiveBorrow(r.getStudentId())) throw new LibraryException("Has unreturned books", 400);
 
-        BookResponse book = bookService.getBookById(request.getBookId());
-        if (book.getAvailableQuantity() <= 0){
-            throw new LibraryException("Kitap artıq mövcud deyil", 400);
-        }
-
-        if (borrowRepository.hasAnyActiveBorrow(request.getStudentId())) {
-            throw new LibraryException("Tələbənin geri qaytarılmamış kitabları var", 400);
-        }
-
-        BorrowResponse borrow =  borrowRepository.save(request.getBookId(), request.getStudentId());
-        bookService.updateAvailableQuantity(request.getBookId(), -1);
+        BorrowResponse borrow = borrowRepo.save(r.getBookId(), r.getStudentId());
+        bookService.updateAvailableQuantity(r.getBookId(), -1);
         return borrow;
     }
 
     @Transactional
     public void returnBook(Long borrowId) {
+        BorrowRepository.BorrowRecord rec = borrowRepo.findById(borrowId);
+        if (rec == null) throw new LibraryException("Borrow not found", 404);
+        if ("RETURNED".equals(rec.getStatus())) throw new LibraryException("Already returned", 400);
 
-        BorrowRepository.BorrowRecord record = borrowRepository.findById(borrowId);
-        if (record == null) {
-            throw new LibraryException("Borrow record tapilmadi", 404);
-        }
-
-
-        if ("RETURNED".equals(record.getStatus())) {
-            throw new LibraryException("Kitab artıq geri qaytarılıb", 400);
-        }
-
-        borrowRepository.updateReturnStatus(borrowId);
-        bookService.updateAvailableQuantity(record.getBookId(), 1);
+        borrowRepo.updateReturnStatus(borrowId);
+        bookService.updateAvailableQuantity(rec.getBookId(), 1);
     }
 
     public List<BorrowResponse> getAllBorrows() {
-        return borrowRepository.findAllWithDetails();
+        return borrowRepo.findAllWithDetails();
     }
 
     public List<BorrowResponse> getActiveBorrows() {
-        return borrowRepository.findActiveBorrows();
+        return borrowRepo.findActiveBorrows();
     }
 
     public List<BorrowResponse> getStudentBorrows(Long studentId) {
-        if (!studentService.studentExists(studentId)) {
-            throw new LibraryException("Student not found", 404);
-        }
-        return borrowRepository.findByStudentId(studentId);
+        if (!studentService.studentExists(studentId)) throw new LibraryException("Student not found", 404);
+        return borrowRepo.findByStudentId(studentId);
     }
 
     public List<BorrowRepository.BookBorrowCount> getMostBorrowedBooks() {
-        return borrowRepository.findMostBorrowedBooks();
+        return borrowRepo.findMostBorrowedBooks();
     }
 }

@@ -5,14 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 
 public class BookCreateRequest {
 
-    @NotBlank(message = "Basliq bos qalabilmez")
+    @NotBlank
     private String title;
     private String author;
 
-    @NotBlank(message = "ISBN bos qalabilmez")
+    @NotBlank
     private String isbn;
 
-    @Min(value = 0, message = "Miqdar bos qalabilmez")
+    @Min(0)
     private int quantity;
 
     public String getTitle() { return title; }
@@ -24,7 +24,5 @@ public class BookCreateRequest {
     public void setTitle(String title) { this.title = title; }
     public void setAuthor(String author) { this.author = author; }
     public void setIsbn(String isbn) { this.isbn = isbn; }
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

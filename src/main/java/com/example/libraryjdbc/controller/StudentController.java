@@ -1,6 +1,6 @@
 package com.example.libraryjdbc.controller;
 
-import com.example.libraryjdbc.dto.BorrowResponse;
+
 import com.example.libraryjdbc.dto.StudentCreateRequest;
 import com.example.libraryjdbc.dto.StudentResponse;
 import com.example.libraryjdbc.service.StudentService;
@@ -15,25 +15,22 @@ import java.util.List;
 @RequestMapping("/api/students")
 public class StudentController {
 
-    private final StudentService studentService;
+    private final StudentService service;
 
+    public StudentController(StudentService service) { this.service = service; }
 
-    public StudentController(StudentService studentService) {
-        this.studentService = studentService;
-    }
-
-    public ResponseEntity<StudentResponse> createStudent(@Valid @RequestBody StudentCreateRequest request){
-        return new ResponseEntity<>(studentService.createStudent(request), HttpStatus.CREATED);
+    @PostMapping
+    public ResponseEntity<StudentResponse> create(@Valid @RequestBody StudentCreateRequest r) {
+        return new ResponseEntity<>(service.createStudent(r), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<StudentResponse>> getAllStudents(){
-        return ResponseEntity.ok(studentService.getAllStudents());
+    public ResponseEntity<List<StudentResponse>> getAll() {
+        return ResponseEntity.ok(service.getAllStudents());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StudentResponse> getStudentById(@PathVariable Long id){
-        return ResponseEntity.ok(studentService.getStudentById(id));
+    public ResponseEntity<StudentResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getStudentById(id));
     }
-
 }

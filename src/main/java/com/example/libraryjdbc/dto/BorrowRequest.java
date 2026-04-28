@@ -4,10 +4,10 @@ import jakarta.validation.constraints.NotNull;
 
 public class BorrowRequest {
 
-    @NotNull(message = "Kitab ID`si teleb olunur")
+    @NotNull
     private Long bookId;
 
-    @NotNull(message = "Telebe ID`si teleb olunur")
+    @NotNull
     private Long studentId;
 
     public Long getBookId() { return bookId; }

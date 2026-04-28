@@ -24,16 +24,10 @@ public class BookResponse {
     }
 
     public Long getId() { return id; }
-
     public String getTitle() { return title; }
-
     public String getAuthor() { return author; }
-
     public String getIsbn() { return isbn; }
-
     public int getQuantity() { return quantity; }
-
     public int getAvailableQuantity() { return availableQuantity; }
-
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
