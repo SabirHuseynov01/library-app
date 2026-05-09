@@ -3,7 +3,6 @@ package com.example.libraryjdbc.controller;
 
 import com.example.libraryjdbc.dto.BorrowRequest;
 import com.example.libraryjdbc.dto.BorrowResponse;
-import com.example.libraryjdbc.repository.BorrowRepository;
 import com.example.libraryjdbc.service.BorrowService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
@@ -41,11 +40,11 @@ public class BorrowController {
 
     @GetMapping("/students/{studentId}/borrows")
     public ResponseEntity<List<BorrowResponse>> getByStudent(@PathVariable Long studentId) {
-        return ResponseEntity.ok(service.getStudentBorrows(studentId));
+        return ResponseEntity.ok(service.getByStudent(studentId));
     }
 
     @GetMapping("/reports/most-borrowed-books")
-    public ResponseEntity<List<BorrowRepository.BookBorrowCount>> getMostBorrowed() {
-        return ResponseEntity.ok(service.getMostBorrowedBooks());
+    public ResponseEntity<List<BorrowService.BookBorrowCount>> getMostBorrowed() {
+        return ResponseEntity.ok(service.getMostBorrowed());
     }
 }
